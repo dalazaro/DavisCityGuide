@@ -1,4 +1,4 @@
-// 1. Text strings =====================================================================================================
+// 1. Object Data =====
 //    Modify these strings and messages to change the behavior of your Lambda function
 
 const languageStrings = {
@@ -6,12 +6,12 @@ const languageStrings = {
         'translation': {
             'WELCOME' : "Welcome to Davis City Guide!",
             'HELP'    : "You can say, about, to hear more about the city.",
-            'OPTIONS' : "Try saying coffee, breakfast, lunch, or dinner, to hear a random restaurant suggestion. Say, recommend an attraction, or say, go outside. ",
+            'OPTIONS' : "Try saying coffee, breakfast, lunch, or dinner, to hear a random restaurant suggestion. Say, recommend an activity, or say, go outside. You can also find out local sports by saying, sports teams.",
             'ABOUT'   : "Davis is a city located in the Central Valley of California. It is home to over 65,000 people, not including the nearly 10,000 students attending UC Davis. Davis is proud of its mix of agriculture, and modern culture.",
-            'STOP'    : "Okay, see you next time!"
+            'STOP'    : ""
         }
     }
-    // , 'de-DE': { 'translation' : { 'TITLE'   : "Local Helfer etc." } }
+
 };
 const data = {
     city: "Davis",
@@ -86,7 +86,7 @@ const data = {
         { "name": "Common Grounds Coffee",
             "address": "2171 Cowell Boulevard", "phone": "530-792-1781",
             "meals": "coffee, breakfast",
-            "description": "A spacious, comfortable atmosphere in South Davis to enjoy coffee and pastry, or to study."
+            "description": "A spacious, comfortable atmosphere in South Davis to enjoy coffee and a pastry, or to study."
         },
         { "name": "Philz Coffee",
             "address": "521 2nd Street", "phone": "530-231-5255",
@@ -95,20 +95,20 @@ const data = {
         },
 
     ],
-    "attractions":[
+    "activities":[
         {
             "name": "UC Davis Arboretum",
             "description": "100 acres of beautiful gardens for active recreation or peaceful contemplation. The Arboretum gardens are open 24 hours a day, every day of the year, and there is no charge for admission.",
-            "distance": "0"
+            "distance": "2"
         },
         {
             "name": "Mondavi Center",
             "description": "The Mondavi Center presents a rich program of diverse artists and thinkers in public performance; their mission is to steward and sustain a state-of-the-art venue for artists and audiences.",
-            "distance": "0"
+            "distance": "1"
         },
         {
             "name": "Davis Farmers Market",
-            "description": "Every Saturday from 8 to 1, and on warmer Wednesday afternoons at Central Park. Open year-round, rain or shine. Everything sold is either grown by or made by the seller.",
+            "description": "Every Saturday from 8 to 1, and on warmer Wednesday afternoons at Central Park. Open year-round, rain or shine. Everything sold is either grown by, or made by, the seller.",
             "distance": "0"
         },
         {
@@ -124,10 +124,10 @@ const data = {
         {
             "name": "Rocknasium",
             "description": "Over 5,500 square feet of vertical terrain, and offers training classes as well as equipment rentals.",
-            "distance": "0"
+            "distance": "1"
         },
         {
-            "name": "Varsity Theater",
+            "name": "Varsity Theatre",
             "description": "The Varsity Theatre is the place to go to see art house, foreign and independent films that are often not shown at the other theaters in town. They have two screens: The larger theater seats 270; the smaller seats 97, with stadium seating. The Varsity also has digital 3D projection capabilities.",
             "distance": "0"
         },
@@ -146,7 +146,8 @@ const myAPI = {
     path: `/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20woeid%20in%20(select%20woeid%20from%20geo.places(1)%20where%20text%3D%22${encodeURIComponent(data.city)}%2C%20${data.state}%22)&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys`,
     method: 'GET'
 };
-// 2. Skill Code =======================================================================================================
+
+// 2. Skill Code =====
 
 const Alexa = require('alexa-sdk');
 
@@ -162,13 +163,13 @@ exports.handler = function(event, context, callback) {
 
 const handlers = {
     'LaunchRequest': function () {
-        let say = this.t('WELCOME') + ' ' + this.t('HELP');
+        let say = this.t('WELCOME') + ' ' + this.t('HELP') + ' ' + this.t('OPTIONS');
         this.response.speak(say).listen(say);
         this.emit(':responseReady');
     },
 
     'AboutIntent': function () {
-        let say = this.t('ABOUT') + ' What else would you like to learn more about? ' + this.t('HELP');
+        let say = this.t('ABOUT') + ' What else would you like to learn more about? ' + this.t('HELP') + ' ' + this.t('OPTIONS');
         this.response.speak(say).listen(say);
         this.emit(':responseReady');
     },
@@ -178,24 +179,22 @@ const handlers = {
         let sportName = '';
         if (this.event.request.intent.slots.sport.value) {
             sportName = this.event.request.intent.slots.sport.value;
-        } else {
-            'Here are the local sports teams. The local basketball teams are the UC Davis Aggies and the Sacramento Kings. The local baseball teams are the UC Davis Aggies and the Sacramento River Cats. The local football team is the UC Davis Aggies. The local soccer teams are the UC Davis Aggies and the Sacramento Republic FC. ';
         }
         switch(sportName) {
         case 'basketball':
-          say = 'The local basketball teams are the UC Davis Aggies and the Sacramento Kings.';
+          say = 'The local basketball teams are the UC Davis Aggies, and the Sacramento Kings.';
           break;
           case 'baseball':
-          say = 'The local baseball teams are the UC Davis Aggies and the Sacramento River Cats.';
+          say = 'The local baseball teams are the UC Davis Aggies, and the Sacramento River Cats.';
           break;
           case 'football':
           say = 'The local football team is the UC Davis Aggies.';
           break;
           case 'soccer':
-          say = 'The local soccer teams are the UC Davis Aggies and the Sacramento Republic FC.';
+          say = 'The local soccer teams are the UC Davis Aggies, and the Sacramento Republic FC.';
           break;
           default:
-          say = 'Please try again. You can ask which team plays either basketball, baseball, football, or soccer.';
+          say = 'Try asking which team plays basketball, baseball, football, or soccer.';
         }
         this.response.speak(say).listen(say);
         this.emit(':responseReady');
@@ -257,18 +256,18 @@ const handlers = {
 
     },
 
-    'AttractionIntent': function () {
+    'ActivityIntent': function () {
         let distance = 200;
         if (this.event.request.intent.slots.distance.value) {
             distance = this.event.request.intent.slots.distance.value;
         }
 
-        let attraction = randomArrayElement(getAttractionsByDistance(distance));
+        let activity = randomArrayElement(getActivitiesByDistance(distance));
 
         let say = 'Try visiting '
-            + attraction.name + ', which is '
-            + (attraction.distance == "0" ? 'right downtown. ' : attraction.distance + ' miles away from downtown Davis. ')
-            + attraction.description;
+            + activity.name + ', which is '
+            + (activity.distance == "0" ? 'right downtown. ' : activity.distance + ' miles away from downtown Davis. ')
+            + activity.description;
 
         this.response.speak(say);
         this.emit(':responseReady');
@@ -323,8 +322,9 @@ const handlers = {
 
 };
 
-//    END of Intent Handlers {} ========================================================================================
-// 3. Helper Function  =================================================================================================
+//    END of Intent Handlers {} =====
+
+// 3. Helper Function =====
 
 function getRestaurantsByMeal(mealtype) {
 
@@ -350,14 +350,14 @@ function getRestaurantByName(restaurantName) {
     return restaurant;
 }
 
-function getAttractionsByDistance(maxDistance) {
+function getActivitiesByDistance(maxDistance) {
 
     let list = [];
 
-    for (let i = 0; i < data.attractions.length; i++) {
+    for (let i = 0; i < data.activities.length; i++) {
 
-        if(parseInt(data.attractions[i].distance) <= maxDistance) {
-            list.push(data.attractions[i]);
+        if(parseInt(data.activities[i].distance) <= maxDistance) {
+            list.push(data.activities[i]);
         }
     }
     return list;
