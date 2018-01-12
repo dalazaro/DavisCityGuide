@@ -66,7 +66,7 @@ const data = {
         { "name": "Woodstock's Pizza",
             "address": "219 G Street", "phone": "530-757-2525",
             "meals": "lunch, dinner",
-            "description": "Popular downtown pizzeria that offers full pies, as well as by-the-slice. Also makes delicious cinnabread."
+            "description": "A popular downtown pizzeria that sells full pies, as well as by-the-slice. Also makes delicious cinnabread."
         },
         { "name": "Fluffy Donuts & Sandwich",
             "address": "757 Russell Boulevard", "phone": "530-756-2037",
@@ -131,7 +131,7 @@ const data = {
             "description": "The Varsity Theatre is the place to go to see art house, foreign and independent films that are often not shown at the other theaters in town. They have two screens: The larger theater seats 270; the smaller seats 97, with stadium seating. The Varsity also has digital 3D projection capabilities.",
             "distance": "0"
         },
-        
+
     ]
 }
 
@@ -172,7 +172,7 @@ const handlers = {
         this.response.speak(say).listen(say);
         this.emit(':responseReady');
     },
-    
+
     'SportsTeamIntent': function () {
         let say = '';
         let sportName = '';
